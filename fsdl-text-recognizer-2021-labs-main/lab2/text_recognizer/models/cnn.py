@@ -1,3 +1,4 @@
+from os import register_at_fork
 from typing import Any, Dict
 import argparse
 
@@ -6,9 +7,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+HIDDEN_DIM = 128
 CONV_DIM = 64
 FC_DIM = 128
 IMAGE_SIZE = 28
+
+def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
+    """3x3 convolution with padding"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+
+
+def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
+    """1x1 convolution"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class ConvBlock(nn.Module):
@@ -38,6 +50,49 @@ class ConvBlock(nn.Module):
         return r
 
 
+class ConvBlock_extra(nn.Module):
+    """
+    Simple 3x3 conv with padding size 1 (to leave the input size unchanged), followed by a ReLU.
+    try to implement a more complex ConvBlock, f(x) + x
+    https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
+    """
+
+    def __init__(self, input_channels: int, output_channels: int, hidden_channels: int, norm_layer: nn.Module) -> None:
+        super().__init__()
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+
+        self.conv1 = nn.Conv2d(input_channels, hidden_channels, kernel_size=3, stride=1, padding=1)
+        self.bn1 = norm_layer(hidden_channels)
+        self.relu1 = nn.ReLU()
+        
+        self.conv2 = nn.Conv2d(hidden_channels, output_channels, kernel_size=3, stride=1, padding=1)
+        self.bn2 = norm_layer(output_channels)
+        self.relu2 = nn.ReLU()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Parameters
+        ----------
+        x
+            of dimensions (B, C, H, W)
+
+        Returns
+        -------
+        torch.Tensor
+            of dimensions (B, C, H, W)
+        """
+        identity = x
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu1(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out += identity
+        out = self.relu2(out)
+        return out
+
+
 class CNN(nn.Module):
     """Simple CNN for recognizing characters in a square image."""
 
@@ -49,10 +104,11 @@ class CNN(nn.Module):
         num_classes = len(data_config["mapping"])
 
         conv_dim = self.args.get("conv_dim", CONV_DIM)
+        hidden_dim = self.args.get("hidden_dim", HIDDEN_DIM)
         fc_dim = self.args.get("fc_dim", FC_DIM)
 
-        self.conv1 = ConvBlock(input_dims[0], conv_dim)
-        self.conv2 = ConvBlock(conv_dim, conv_dim)
+        self.conv1 = ConvBlock_extra(input_dims[0], conv_dim, hidden_dim, None)
+        self.conv2 = ConvBlock_extra(conv_dim, conv_dim, hidden_dim, None)
         self.dropout = nn.Dropout(0.25)
         self.max_pool = nn.MaxPool2d(2)
 
@@ -89,5 +145,7 @@ class CNN(nn.Module):
     @staticmethod
     def add_to_argparse(parser):
         parser.add_argument("--conv_dim", type=int, default=CONV_DIM)
+        parser.add_argument("--hidden_dim", type=int, default=HIDDEN_DIM)
         parser.add_argument("--fc_dim", type=int, default=FC_DIM)
+        parser.add_argument("--num_ConvBlock", type=int, default=2) # to do, add layers number as an arg
         return parser
