@@ -35,14 +35,14 @@ class LineCNNSimple(nn.Module):
         Parameters
         ----------
         x
-            (B, C, H, W) input image
+            (B, C, H, W) input image, C is channels
 
         Returns
         -------
         torch.Tensor
             (B, C, S) logits, where S is the length of the sequence and C is the number of classes
             S can be computed from W and CHAR_WIDTH
-            C is self.num_classes
+            C is self.num_classes, 
         """
         B, _C, H, W = x.shape
         assert H == IMAGE_SIZE  # Make sure we can use our CNN class
@@ -56,7 +56,7 @@ class LineCNNSimple(nn.Module):
             start_w = self.WS * s
             end_w = start_w + self.WW
             window = x[:, :, :, start_w:end_w]  # -> (B, C, H, self.WW)
-            activations[:, :, s] = self.cnn(window)
+            activations[:, :, s] = self.cnn(window) # input is the window image
 
         if self.limit_output_length:
             # S might not match ground truth, so let's only take enough activations as are expected

@@ -59,12 +59,12 @@ class LineCNNLSTM(nn.Module):
 
         x, _ = self.lstm(x)  # -> (S, B, 2 * H) where H is lstm_dim
 
-        # Sum up both directions of the LSTM:
+        # Sum up both directions of the bidir-LSTM:
         x = x.view(S, B, 2, -1).sum(dim=2)  # -> (S, B, H)
 
         x = self.fc(x)  # -> (S, B, C)
 
-        return x.permute(1, 2, 0)  # -> (B, C, S)
+        return x.permute(1, 2, 0)  # -> reshape to (B, C, S)
 
     @staticmethod
     def add_to_argparse(parser):

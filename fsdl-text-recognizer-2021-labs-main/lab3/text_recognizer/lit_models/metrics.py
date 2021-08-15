@@ -6,7 +6,21 @@ import editdistance
 
 
 class CharacterErrorRate(pl.metrics.Metric):
-    """Character error rate metric, computed using Levenshtein distance."""
+    """
+    Character error rate metric, computed using Levenshtein distance.
+
+    HW: In your own words, explain how the CharacterErrorRate metric and the greedy_decode method work.
+
+    Levenshtein distance:
+    https://en.wikipedia.org/wiki/Levenshtein_distance
+     the Levenshtein distance is a string metric for measuring the difference between two sequences. 
+     Informally, the Levenshtein distance between two words is the minimum number of single-character edits (insertions, deletions or substitutions) required to change one word into the other. 
+
+
+    https://pypi.org/project/editdistance/0.3.1/
+    distance = editdistance.distance(pred, target)
+    
+    """
 
     def __init__(self, ignore_tokens: Sequence[int], *args):
         super().__init__(*args)
