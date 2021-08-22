@@ -49,6 +49,7 @@ class TransformerLitModel(BaseLitModel):  # pylint: disable=too-many-ancestors
 
         pred = self.model.predict(x)
         # Hide lines below until Lab 5
+        # log output to w&b !
         pred_str = "".join(self.mapping[_] for _ in pred[0].tolist() if _ != 3)
         try:
             self.logger.experiment.log({"val_pred_examples": [wandb.Image(x[0], caption=pred_str)]})

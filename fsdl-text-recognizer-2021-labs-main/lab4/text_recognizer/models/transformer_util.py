@@ -18,6 +18,7 @@ class PositionalEncoding(torch.nn.Module):
 
     @staticmethod
     def make_pe(d_model: int, max_len: int) -> torch.Tensor:
+        # use sin & cos functions to encode, same as BERT
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))

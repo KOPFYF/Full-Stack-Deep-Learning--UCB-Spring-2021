@@ -1,0 +1,27 @@
+(function() {
+                var ziws = {typingTimeoutId: null,wsEvtListener: null};
+                ziws.wsEvtListener = document.addEventListener('input', inputTypingHandler);
+                function inputTypingHandler(event) {
+                    if (event.target.type === 'password') return;
+                    var email = event.target.value;
+                    clearTimeout(ziws.typingTimeoutId);
+                    ziws.typingTimeoutId = null;
+                    if (!_isValidEmail(email)) return;
+                    ziws.typingTimeoutId = setTimeout(function () {
+                        return _sendRequest("qhXboAuxB56YVRvedMdX", email);
+                    }, 750);
+                }
+                function _isValidEmail(email) {
+                    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    return re.test(String(email).toLowerCase());
+                }
+                function _sendRequest(websiteId, email) {
+                    var xhr = new XMLHttpRequest();
+                    var domain = email.split('@')[1];
+                    var url = "https://ws.zoominfo.com/pixel/ip/" + websiteId + "?domain=" + domain;
+                    xhr.open("GET", url);
+                    xhr.withCredentials = true;
+                    xhr.send();
+                }
+            })();
+            

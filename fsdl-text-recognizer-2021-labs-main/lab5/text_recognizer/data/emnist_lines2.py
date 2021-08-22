@@ -214,15 +214,18 @@ def create_dataset_of_images(N, samples_by_char, sentence_generator, min_overlap
 
 
 def get_transform(augment=False):
-    """Augment with brightness, slight rotation, slant, translation, scale, and Gaussian noise."""
+    """
+    Augment with brightness, slight rotation, slant, translation, scale, and Gaussian noise.
+    Prevent model from overfitting
+    """
     if not augment:
         return transforms.Compose([transforms.ToTensor()])
     return transforms.Compose(
         [
-            transforms.ColorJitter(brightness=(0.5, 1)),
+            transforms.ColorJitter(brightness=(0.5, 1)), # brightness
             transforms.RandomAffine(
                 degrees=3, translate=(0, 0.05), scale=(0.4, 1.1), shear=(-40, 50), resample=Image.BILINEAR, fillcolor=0
-            ),
+            ), # rotate, scale, resample, etc
             transforms.ToTensor(),
         ]
     )

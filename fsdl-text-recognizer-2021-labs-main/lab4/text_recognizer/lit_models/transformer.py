@@ -37,7 +37,7 @@ class TransformerLitModel(BaseLitModel):  # pylint: disable=too-many-ancestors
     def training_step(self, batch, batch_idx):  # pylint: disable=unused-argument
         x, y = batch
         logits = self.model(x, y[:, :-1])
-        loss = self.loss_fn(logits, y[:, 1:])
+        loss = self.loss_fn(logits, y[:, 1:]) # offset by 1
         self.log("train_loss", loss)
         return loss
 

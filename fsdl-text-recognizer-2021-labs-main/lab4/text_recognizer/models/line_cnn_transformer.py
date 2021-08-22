@@ -49,10 +49,13 @@ class LineCNNTransformer(nn.Module):
         self.embedding = nn.Embedding(self.num_classes, self.dim)
         self.fc = nn.Linear(self.dim, self.num_classes)
 
+        # Positional Encoding in BERT
         self.pos_encoder = PositionalEncoding(d_model=self.dim)
 
+        # Triangular mask to mask out future info
         self.y_mask = generate_square_subsequent_mask(self.max_output_length)
 
+        # Transformer Decoder
         self.transformer_decoder = nn.TransformerDecoder(
             nn.TransformerDecoderLayer(d_model=self.dim, nhead=tf_nhead, dim_feedforward=tf_fc_dim, dropout=tf_dropout),
             num_layers=tf_layers,
@@ -146,6 +149,8 @@ class LineCNNTransformer(nn.Module):
 
         output_tokens = (torch.ones((B, S)) * self.padding_token).type_as(x).long()  # (B, S)
         output_tokens[:, 0] = self.start_token  # Set start token
+
+        
         for Sy in range(1, S):
             y = output_tokens[:, :Sy]  # (B, Sy)
             output = self.decode(x, y)  # (Sy, B, C)

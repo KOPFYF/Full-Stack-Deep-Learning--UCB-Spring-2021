@@ -93,10 +93,11 @@ def main():
 
     logger = pl.loggers.TensorBoardLogger("training/logs")
     # Hide lines below until Lab 5
-    if args.wandb:
+    # weight & bias web
+    if args.wandb: 
         logger = pl.loggers.WandbLogger()
-        logger.watch(model)
-        logger.log_hyperparams(vars(args))
+        logger.watch(model) 
+        logger.log_hyperparams(vars(args)) # log all args in cmd line
     # Hide lines above until Lab 5
 
     early_stopping_callback = pl.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=10)
